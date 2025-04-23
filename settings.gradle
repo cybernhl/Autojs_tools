@@ -1,2 +1,3 @@
 rootProject.name='Autojs'
-include ':app'
+include(":Autojs_tools")
+project(":Autojs_tools").projectDir = file("./app")
