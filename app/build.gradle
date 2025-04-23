@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 28
-    buildToolsVersion "29.0.2"
+    compileSdk 28
 
     defaultConfig {
+        namespace "com.liuliuzhu.autojs"
         applicationId "com.liuliuzhu.autojs"
-        minSdkVersion 15
-        targetSdkVersion 28
+        minSdk 15
+        targetSdk 28
         versionCode 1
         versionName "1.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -19,14 +19,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 }
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+
+    compileOnly files('libs/api-82.jar')
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    compileOnly files('libs/api-82.jar')
 }
