@@ -33,10 +33,50 @@ public class Hook extends Application implements IXposedHookLoadPackage, Config 
                 new XC_MethodHook() {
                     @Override
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        Log.e("XPOSED", "decrypt() called");
+                        byte[] data = (byte[]) param.args[0];
+                        int offset = (int) param.args[1];
+                        int length = (int) param.args[2];
+                        Log.e("XPOSED", "offset: " + offset + ", length: " + length + "\n" + "data length: " + data.length);
                         // 拿到的解密数据
                         String str = HookUtils.bytesToString((byte[]) param.getResult());
                         HookUtils.strToFile(str, FILEPATH);
                     }
                 });
+
+        XposedHelpers.findAndHookMethod(
+                clazz,
+                "initFingerprint",
+                XposedHelpers.findClass("com.stardust.autojs.project.ProjectConfig", loadPackageParam.classLoader),
+                new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        Object projectConfig = param.args[0];
+
+                        String packageName = (String) XposedHelpers.getObjectField(projectConfig, "packageName");
+                        String versionName = (String) XposedHelpers.getObjectField(projectConfig, "versionName");
+                        String mainScriptFile = (String) XposedHelpers.getObjectField(projectConfig, "mainScriptFile");
+                        Object buildInfo = XposedHelpers.getObjectField(projectConfig, "buildInfo");
+                        String buildId = (String) XposedHelpers.callMethod(buildInfo, "getBuildId");
+                        String name = (String) XposedHelpers.getObjectField(projectConfig, "name");
+
+                        // 取得 this (ScriptEncryption instance)
+                        Object thisObject = param.thisObject;
+                        byte[] mKey = (byte[]) XposedHelpers.getObjectField(thisObject, "mKey");
+                        String mInitVector = (String) XposedHelpers.getObjectField(thisObject, "mInitVector");
+                        String log = "==[ScriptEncryption::initFingerprint]==\n" +
+                                "packageName: " + packageName + "\n" +
+                                "versionName: " + versionName + "\n" +
+                                "mainScriptFile: " + mainScriptFile + "\n" +
+                                "buildId: " + buildId + "\n" +
+                                "name: " + name + "\n" +
+                                "Key (mKey): " + Arrays.toString(mKey) + "\n" +
+                                "IV (mInitVector): " + mInitVector + "\n" +
+                                "========================\n";
+                        Log.e("XPOSED_HOOK", log);
+                        XposedBridge.log(log);
+                    }
+                }
+        );
     }
 }
